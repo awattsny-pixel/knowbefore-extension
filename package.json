@@ -1,0 +1,22 @@
+{
+  "name": "knowbefore-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "KnowBefore browser thin client — local detection, one-click handoff to the platform.",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.280",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "esbuild": "^0.24.0",
+    "typescript": "^5"
+  }
+}
