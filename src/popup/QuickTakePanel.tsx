@@ -5,6 +5,21 @@ import type { QuickTakeRequest, QuickTakeResponse } from "../shared/types";
 
 type Status = "idle" | "loading" | "ready" | "not_connected" | "session_expired" | "error";
 
+/** knowbefore-app's new-decision flow lives at /decisions/new (plural)
+    — not /decision/new, which 404s. Prefills the description from
+    what the Quick Take already found so the user doesn't have to
+    retype what they just read. Full handoff of the findings
+    themselves (not just a text summary) is Phase 3 — see Section 8
+    of the Build Plan. */
+function fullWorkspaceUrl(data: QuickTakeResponse): string {
+  const summary = [
+    data.subject,
+    ...data.findings.slice(0, 3).map((f) => f.claim),
+  ].join(". ");
+  const params = new URLSearchParams({ description: summary });
+  return `http://localhost:3000/decisions/new?${params.toString()}`;
+}
+
 /** The compact panel from the MVP Build Plan, Section 7 — optimizes
     for speed, clarity, trust, and actionability, not completeness.
     Deliberately capped at the same 3-5 findings the API route returns. */
@@ -79,7 +94,7 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
           <p style={styles.rowText}>{f.claim}</p>
         </div>
       ))}
-      <a href={`http://localhost:3000/decision/new?from=extension`} target="_blank" rel="noreferrer" style={styles.cta}>
+      <a href={fullWorkspaceUrl(data)} target="_blank" rel="noreferrer" style={styles.cta}>
         Open full Commitment Workspace →
       </a>
     </div>
