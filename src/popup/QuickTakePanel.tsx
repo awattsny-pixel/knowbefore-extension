@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { EvidenceMark } from "./EvidenceMark";
 import { PurchaseComparisonView } from "./PurchaseComparisonView";
-import { fetchQuickTake, saveQuickTake, NotConnectedError, SessionExpiredError } from "../shared/apiClient";
+import { API_BASE, fetchQuickTake, saveQuickTake, NotConnectedError, SessionExpiredError } from "../shared/apiClient";
 import type { QuickTakeRequest, QuickTakeResponse } from "../shared/types";
 
 type Status = "idle" | "loading" | "ready" | "not_connected" | "session_expired" | "error";
@@ -14,14 +14,14 @@ type SaveStatus = "idle" | "saving" | "saved" | "error";
     decisionId is null) and there's genuinely nothing to open yet. */
 function fullWorkspaceUrl(data: QuickTakeResponse): string {
   if (data.decisionId) {
-    return `http://localhost:3000/decision/${data.decisionId}/canvas`;
+    return `${API_BASE}/decision/${data.decisionId}/canvas`;
   }
   const summary = [
     data.subject,
     ...data.findings.slice(0, 3).map((f) => f.claim),
   ].join(". ");
   const params = new URLSearchParams({ description: summary });
-  return `http://localhost:3000/decisions/new?${params.toString()}`;
+  return `${API_BASE}/decisions/new?${params.toString()}`;
 }
 
 /** The compact panel from the MVP Build Plan, Section 7 — optimizes
@@ -88,7 +88,7 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
             ? "You'll only need to do this once."
             : "Your session expired — this happens after a while for your security."}
         </p>
-        <a href="http://localhost:3000/extension/connect" target="_blank" rel="noreferrer" style={styles.cta}>
+        <a href={`${API_BASE}/extension/connect`} target="_blank" rel="noreferrer" style={styles.cta}>
           {status === "not_connected" ? "Connect" : "Reconnect"} →
         </a>
       </div>

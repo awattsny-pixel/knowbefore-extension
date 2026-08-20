@@ -1,6 +1,6 @@
 import { setStoredToken, clearStoredToken } from "../storage/extensionStorage";
 
-/** Receives the scoped token from knowbefore.app/extension/connect via
+/** Receives the scoped token from knowbefore.ai/extension/connect via
     externally_connectable (manifest restricts the sender origin to the
     KnowBefore domain — see manifest.json). This is step 3 of the Auth
     Bridge design in the MVP Build Plan, Section 10. */
@@ -28,7 +28,11 @@ export function registerAuthBridge(): void {
 function isTrustedOrigin(url: string): boolean {
   try {
     const origin = new URL(url).origin;
-    return origin === "https://knowbefore.app" || origin === "http://localhost:3000";
+    return (
+      origin === "https://knowbefore.ai" ||
+      origin === "https://www.knowbefore.ai" ||
+      origin === "http://localhost:3000"
+    );
   } catch {
     return false;
   }

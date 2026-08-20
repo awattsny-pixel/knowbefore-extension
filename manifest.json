@@ -29,8 +29,8 @@
     }
   ],
   "permissions": ["storage", "activeTab", "scripting"],
-  "host_permissions": ["https://knowbefore.app/*", "http://localhost:3000/*"],
+  "host_permissions": ["https://knowbefore.ai/*", "https://www.knowbefore.ai/*", "http://localhost:3000/*"],
   "externally_connectable": {
-    "matches": ["https://knowbefore.app/*", "http://localhost:3000/*"]
+    "matches": ["https://knowbefore.ai/*", "https://www.knowbefore.ai/*", "http://localhost:3000/*"]
   }
 }

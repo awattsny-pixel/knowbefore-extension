@@ -1,8 +1,7 @@
 import { getStoredToken } from "../storage/extensionStorage";
 import type { CategoryExcluded, PurchaseOptionsResponse, QuickTakeRequest, QuickTakeResponse } from "./types";
 
-// Swap to https://knowbefore.app for production builds.
-const API_BASE = "http://localhost:3000";
+export const API_BASE = "https://knowbefore.ai";
 
 export class NotConnectedError extends Error {
   constructor() {
