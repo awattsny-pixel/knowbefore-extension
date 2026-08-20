@@ -6,8 +6,8 @@ The browser thin client from the [MVP Build Plan](../knowbefore-app) — a new f
 
 - `src/content/` — local, on-device detection only. `commitmentDetector.ts` is sub-scope A (same-document DOM heuristics), `pdfSignal.ts` is sub-scope B (PDF detection by URL/MIME signal, not by reading). Cross-origin embeds (Stripe Checkout, DocuSign) are explicitly out of scope — a content script cannot read them.
 - `src/background/` — message routing and the auth bridge (`authBridge.ts` implements step 3 of the connect flow: receiving the scoped token via `externally_connectable`).
-- `src/popup/` — the Quick-Take panel, using a duplicated copy of `EvidenceMark` (see the comment in `EvidenceMark.tsx` for why it's copied rather than shared).
-- `src/shared/apiClient.ts` — the *only* function in this repo allowed to call the platform. Everything else is local until the user clicks.
+- `src/popup/` — the Quick-Take panel, using a duplicated copy of `EvidenceMark` (see the comment in `EvidenceMark.tsx` for why it's copied rather than shared). Includes the purchase-comparison view and the Save-to-KnowBefore flow (Phase 3 — see below).
+- `src/shared/apiClient.ts` — the *only* module in this repo allowed to call the platform. Everything else is local until the user clicks.
 
 ## Setup
 
@@ -26,6 +26,15 @@ npm run typecheck
 4. Open `test-pages/subscription-checkout.html` in a tab (or `file://` it directly) — the toolbar icon should badge within a second or two, with no network activity (check the Network tab to confirm).
 5. Click the icon → the popup calls `/api/extension/quick-take` on the app. Run `knowbefore-app` locally first (`npm run dev`, port 3000) and connect via `http://localhost:3000/extension/connect`.
 
+## Save to KnowBefore (Phase 3)
+
+Every Quick Take writes an ephemeral `decisions` row on the platform as soon as it generates — hidden from "My Decisions" until you explicitly act on it. Two ways to keep it:
+
+- **Save** in the popup clears the ephemeral flag on that same row.
+- **Open full Commitment Workspace** saves first, then opens the canvas — so there's no window where the tab is open on a row that's still technically ephemeral.
+
+Anything left ephemeral for 48 hours is hard-deleted server-side (`knowbefore-app`'s `/api/internal/cleanup-ephemeral`, run on a schedule). Requires `knowbefore-app`'s `SUPABASE_SERVICE_ROLE_KEY` to be set — see that repo's `.env.local.example`.
+
 ## Explicitly not built yet
 
-Silent token refresh, Firefox/Safari support, the Commitment Workspace save flow (Phase 3), and detection beyond sub-scopes A and B. See the Build Plan's Non-Goals (Section 16) and Development Phases (Section 13) before adding anything here.
+Silent token refresh, Firefox/Safari support, and detection beyond sub-scopes A and B. See the Build Plan's Non-Goals (Section 16) and Development Phases (Section 13) before adding anything here.
