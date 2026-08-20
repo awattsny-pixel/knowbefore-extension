@@ -1,18 +1,21 @@
 import { useEffect, useState } from "react";
 import { EvidenceMark } from "./EvidenceMark";
 import { PurchaseComparisonView } from "./PurchaseComparisonView";
-import { fetchQuickTake, NotConnectedError, SessionExpiredError } from "../shared/apiClient";
+import { fetchQuickTake, saveQuickTake, NotConnectedError, SessionExpiredError } from "../shared/apiClient";
 import type { QuickTakeRequest, QuickTakeResponse } from "../shared/types";
 
 type Status = "idle" | "loading" | "ready" | "not_connected" | "session_expired" | "error";
+type SaveStatus = "idle" | "saving" | "saved" | "error";
 
-/** knowbefore-app's new-decision flow lives at /decisions/new (plural)
-    — not /decision/new, which 404s. Prefills the description from
-    what the Quick Take already found so the user doesn't have to
-    retype what they just read. Full handoff of the findings
-    themselves (not just a text summary) is Phase 3 — see Section 8
-    of the Build Plan. */
+/** Points at the real ephemeral decision quick-take already wrote
+    (Section 8, State 1) — /decision/[id]/canvas, not /decisions/new.
+    Falls back to the old prefilled-description flow only if server-
+    side persistence failed for this particular Quick Take (data.
+    decisionId is null) and there's genuinely nothing to open yet. */
 function fullWorkspaceUrl(data: QuickTakeResponse): string {
+  if (data.decisionId) {
+    return `http://localhost:3000/decision/${data.decisionId}/canvas`;
+  }
   const summary = [
     data.subject,
     ...data.findings.slice(0, 3).map((f) => f.claim),
@@ -27,6 +30,29 @@ function fullWorkspaceUrl(data: QuickTakeResponse): string {
 export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
   const [status, setStatus] = useState<Status>("idle");
   const [data, setData] = useState<QuickTakeResponse | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+
+  async function handleSave(decisionId: string) {
+    setSaveStatus("saving");
+    try {
+      await saveQuickTake(decisionId);
+      setSaveStatus("saved");
+    } catch {
+      setSaveStatus("error");
+    }
+  }
+
+  // Both explicit Save and "Open Full Commitment Workspace" move this
+  // out of the ephemeral state (Section 8) — the plan names them as
+  // equally valid ways to do it. Saves first, then opens the tab, so
+  // there's no window where the tab is open on a row that's still
+  // technically ephemeral.
+  async function handleOpenWorkspace(url: string, decisionId: string | null) {
+    if (decisionId && saveStatus !== "saved") {
+      await handleSave(decisionId);
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -102,9 +128,28 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
           choice. Renders nothing at all on excluded/empty/error. */}
       <PurchaseComparisonView request={request} />
 
-      <a href={fullWorkspaceUrl(data)} target="_blank" rel="noreferrer" style={styles.cta}>
-        Open full Commitment Workspace →
-      </a>
+      <div style={styles.actions}>
+        {data.decisionId && (
+          <button
+            type="button"
+            onClick={() => handleSave(data.decisionId!)}
+            disabled={saveStatus === "saving" || saveStatus === "saved"}
+            style={styles.saveButton}
+          >
+            {saveStatus === "saved" ? "Saved ✓" : saveStatus === "saving" ? "Saving…" : "Save"}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => handleOpenWorkspace(fullWorkspaceUrl(data), data.decisionId)}
+          style={styles.cta}
+        >
+          Open full Commitment Workspace →
+        </button>
+      </div>
+      {saveStatus === "error" && (
+        <p style={styles.saveError}>Couldn&apos;t save — try again in a moment.</p>
+      )}
     </div>
   );
 }
@@ -117,8 +162,8 @@ const styles: Record<string, React.CSSProperties> = {
   row: { display: "flex", gap: 8, alignItems: "flex-start", padding: "8px 0", borderTop: "1px solid #d7ddd6" },
   rowText: { fontSize: 12.5, lineHeight: 1.4, margin: 0 },
   cta: {
+    flex: 1,
     display: "block",
-    marginTop: 14,
     padding: "10px 12px",
     background: "#e2ede9",
     color: "#1f6f68",
@@ -126,6 +171,23 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     textAlign: "center",
     textDecoration: "none",
+    border: "none",
     borderRadius: 6,
+    cursor: "pointer",
+    fontFamily: "inherit",
   },
+  actions: { display: "flex", gap: 8, marginTop: 14 },
+  saveButton: {
+    padding: "10px 14px",
+    background: "#ffffff",
+    color: "#1f6f68",
+    border: "1px solid #1f6f68",
+    borderRadius: 6,
+    fontSize: 12.5,
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    whiteSpace: "nowrap",
+  },
+  saveError: { fontSize: 11, color: "#7a3a30", margin: "6px 0 0" },
 };

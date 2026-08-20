@@ -34,6 +34,11 @@ export interface QuickTakeRequest {
 export interface QuickTakeResponse {
   findings: QuickTakeFinding[];
   subject: string;
+  /** The ephemeral decision row the server wrote for this Quick Take
+      (Section 8, State 1) — null if persistence failed server-side,
+      in which case the findings above still render, there's just
+      nothing to Save. See /api/extension/save. */
+  decisionId: string | null;
 }
 
 /** Mirrors knowbefore-app's ProductOption + find-products shape. No

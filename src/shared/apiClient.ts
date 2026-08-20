@@ -61,3 +61,23 @@ export async function fetchPurchaseOptions(
 
   return res.json();
 }
+
+/** State 1 → State 2 (MVP Build Plan, Section 8) — clears the
+    ephemeral flag on a decision the quick-take call already wrote.
+    No new record; just a flag flip on the existing row. */
+export async function saveQuickTake(decisionId: string): Promise<void> {
+  const token = await getStoredToken();
+  if (!token) throw new NotConnectedError();
+
+  const res = await fetch(`${API_BASE}/api/extension/save`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ decisionId }),
+  });
+
+  if (res.status === 401) throw new SessionExpiredError();
+  if (!res.ok) throw new Error(`save failed: ${res.status}`);
+}
