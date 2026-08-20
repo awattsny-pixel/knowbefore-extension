@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { EvidenceMark } from "./EvidenceMark";
+import { PurchaseComparisonView } from "./PurchaseComparisonView";
 import { fetchQuickTake, NotConnectedError, SessionExpiredError } from "../shared/apiClient";
 import type { QuickTakeRequest, QuickTakeResponse } from "../shared/types";
 
@@ -94,6 +95,13 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
           <p style={styles.rowText}>{f.claim}</p>
         </div>
       ))}
+
+      {/* Its own zone, always after the findings — never interleaved
+          with them. See PurchaseComparisonView's own comment for why
+          that ordering is Appendix B's firewall, not just a layout
+          choice. Renders nothing at all on excluded/empty/error. */}
+      <PurchaseComparisonView request={request} />
+
       <a href={fullWorkspaceUrl(data)} target="_blank" rel="noreferrer" style={styles.cta}>
         Open full Commitment Workspace →
       </a>

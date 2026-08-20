@@ -1,5 +1,5 @@
 import { getStoredToken } from "../storage/extensionStorage";
-import type { QuickTakeRequest, QuickTakeResponse } from "./types";
+import type { CategoryExcluded, PurchaseOptionsResponse, QuickTakeRequest, QuickTakeResponse } from "./types";
 
 // Swap to https://knowbefore.app for production builds.
 const API_BASE = "http://localhost:3000";
@@ -34,6 +34,30 @@ export async function fetchQuickTake(request: QuickTakeRequest): Promise<QuickTa
 
   if (res.status === 401) throw new SessionExpiredError();
   if (!res.ok) throw new Error(`quick-take failed: ${res.status}`);
+
+  return res.json();
+}
+
+/** The "where to buy" call — always a separate request from
+    fetchQuickTake, never bundled into it. See the route's own comment
+    for why that separation is the point, not an implementation detail. */
+export async function fetchPurchaseOptions(
+  request: QuickTakeRequest
+): Promise<PurchaseOptionsResponse | CategoryExcluded> {
+  const token = await getStoredToken();
+  if (!token) throw new NotConnectedError();
+
+  const res = await fetch(`${API_BASE}/api/extension/purchase-options`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (res.status === 401) throw new SessionExpiredError();
+  if (!res.ok) throw new Error(`purchase-options failed: ${res.status}`);
 
   return res.json();
 }
