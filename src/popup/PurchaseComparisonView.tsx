@@ -1,23 +1,10 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { fetchPurchaseOptions } from "../shared/apiClient";
 import { LoadingMark } from "./LoadingMark";
+import { NAVY, GOLD, GOLD_TINT, INK, INK_MUTED, INK_FAINT, RULE, PAPER } from "./theme";
 import type { PurchaseOption, QuickTakeRequest } from "../shared/types";
 
 type Status = "loading" | "ready" | "excluded" | "empty" | "error";
-
-// Navy + gold, matching the header band in QuickTakePanel -- teal
-// read as a third, unrelated accent color next to that pairing.
-const ACCENT = "#0b2d4d";
-const ACCENT_TINT = "#f6ead9";
-const GOLD = "#b5854f";
-const INK = "#1b2220";
-const INK_MUTED = "#4a5450";
-const INK_FAINT = "#7c8580";
-const RULE = "#d7ddd6";
-// A tint, not pure white -- the popup's own background is white now
-// (see popup.html), so a white card would have no visible separation
-// from the panel it sits on.
-const PAPER_RAISED = "#f7f8f6";
 
 /** The "where to buy" zone — always rendered below and visually
     distinct from the evidence findings in QuickTakePanel, never
@@ -150,7 +137,8 @@ const styles: Record<string, CSSProperties> = {
     border: `1px solid ${RULE}`,
     borderRadius: 8,
     padding: "10px 12px",
-    background: PAPER_RAISED,
+    background: PAPER,
+    boxShadow: "0 1px 3px rgba(11,45,77,0.06)",
   },
   bestFor: {
     display: "inline-block",
@@ -158,8 +146,8 @@ const styles: Record<string, CSSProperties> = {
     fontSize: 10,
     fontWeight: 700,
     letterSpacing: 0.3,
-    color: ACCENT,
-    background: ACCENT_TINT,
+    color: NAVY,
+    background: GOLD_TINT,
     borderRadius: 999,
     padding: "2px 8px",
     marginBottom: 6,
@@ -194,7 +182,7 @@ const styles: Record<string, CSSProperties> = {
     fontFamily: "-apple-system, 'Segoe UI', sans-serif",
     fontSize: 12,
     fontWeight: 700,
-    color: ACCENT,
+    color: NAVY,
     textDecoration: "none",
   },
   disclosure: {

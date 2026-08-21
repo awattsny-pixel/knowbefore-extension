@@ -1,3 +1,5 @@
+import { NAVY, GOLD_LIGHT, INK_MUTED, RULE, PAPER } from "../popup/theme";
+
 /** Stage 2 from the MVP Build Plan, Section 2 — a purely local,
     non-blocking notice. No network request happens here or anywhere
     else in this file; it only tells the background service worker to
@@ -55,10 +57,10 @@ export function showInlinePrompt(anchor: Element, onClick: () => void): void {
     "align-items: center",
     "gap: 8px",
     "font-family: -apple-system, 'Segoe UI', sans-serif",
-    "background: #ffffff",
+    `background: ${PAPER}`,
     "padding: 8px 12px 8px 8px",
     "border-radius: 10px",
-    "border: 1px solid #d7ddd6",
+    `border: 1px solid ${RULE}`,
     "cursor: pointer",
     "box-shadow: 0 6px 20px rgba(11,45,77,0.14)",
     "animation: kb-inline-prompt-in 200ms ease-out",
@@ -66,12 +68,12 @@ export function showInlinePrompt(anchor: Element, onClick: () => void): void {
 
   prompt.innerHTML = `
     <svg width="22" height="22" viewBox="0 0 100 100" aria-hidden="true">
-      <path d="M50 10 L90 50 L50 90 L10 50 Z" fill="none" stroke="#0b2d4d" stroke-width="5" stroke-linejoin="round" />
-      <path d="M32 51 L45 64 L70 36" fill="none" stroke="#d4a574" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M50 10 L90 50 L50 90 L10 50 Z" fill="none" stroke="${NAVY}" stroke-width="5" stroke-linejoin="round" />
+      <path d="M32 51 L45 64 L70 36" fill="none" stroke="${GOLD_LIGHT}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
     <span>
-      <span style="display:block;font-size:12.5px;font-weight:700;color:#0b2d4d;line-height:1.3;">KnowBefore</span>
-      <span style="display:block;font-size:11.5px;color:#4a5450;line-height:1.3;">Worth understanding first?</span>
+      <span style="display:block;font-size:12.5px;font-weight:700;color:${NAVY};line-height:1.3;">KnowBefore</span>
+      <span style="display:block;font-size:11.5px;color:${INK_MUTED};line-height:1.3;">Worth understanding first?</span>
     </span>
   `;
 

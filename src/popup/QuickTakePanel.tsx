@@ -3,6 +3,7 @@ import { EvidenceMark } from "./EvidenceMark";
 import { LoadingMark } from "./LoadingMark";
 import { PurchaseComparisonView } from "./PurchaseComparisonView";
 import { API_BASE, fetchQuickTake, saveQuickTake, NotConnectedError, SessionExpiredError } from "../shared/apiClient";
+import { NAVY, GOLD_LIGHT, INK, INK_MUTED, INK_FAINT, RULE, PAPER, errorText } from "./theme";
 import type { QuickTakeRequest, QuickTakeResponse } from "../shared/types";
 
 type Status = "idle" | "loading" | "ready" | "not_connected" | "session_expired" | "error";
@@ -188,33 +189,35 @@ const styles: Record<string, React.CSSProperties> = {
   panel: {
     width: 320,
     fontFamily: "-apple-system, 'Segoe UI', sans-serif",
-    color: "#1b2220",
-    background: "#ffffff",
+    color: INK,
+    background: PAPER,
     overflow: "hidden",
   },
   header: {
-    background: "#0b2d4d",
+    background: NAVY,
     padding: "16px 16px 14px",
   },
   contentPad: { padding: "14px 16px 16px" },
-  titlebar: { fontSize: 11, fontWeight: 700, letterSpacing: 1, color: "#d4a574", margin: "0 0 6px" },
-  title: { fontSize: 16, fontWeight: 700, color: "#ffffff", margin: 0 },
-  muted: { fontSize: 12.5, color: "#4a5450", margin: 0 },
+  titlebar: { fontSize: 11, fontWeight: 700, letterSpacing: 1, color: GOLD_LIGHT, margin: "0 0 6px" },
+  title: { fontSize: 16, fontWeight: 700, color: PAPER, margin: 0 },
+  muted: { fontSize: 12.5, color: INK_MUTED, margin: 0 },
   row: {
     display: "flex",
     gap: 8,
     alignItems: "flex-start",
     padding: "10px 0",
-    borderTop: "1px solid #ececec",
+    borderTop: `1px solid ${RULE}`,
   },
   rowIn: { opacity: 0, animation: "kb-row-in 320ms ease-out forwards" },
   rowText: { fontSize: 12.5, lineHeight: 1.4, margin: 0 },
+  // Primary action — every button in the popup uses this navy fill
+  // (see theme.ts) rather than each screen picking its own accent.
   cta: {
     flex: 1,
     display: "block",
-    padding: "10px 12px",
-    background: "#e2ede9",
-    color: "#1f6f68",
+    padding: "11px 12px",
+    background: NAVY,
+    color: PAPER,
     fontSize: 12.5,
     fontWeight: 600,
     textAlign: "center",
@@ -225,11 +228,13 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "inherit",
   },
   actions: { display: "flex", gap: 8, marginTop: 14 },
+  // Secondary action, next to a primary cta — navy outline instead of
+  // a filled navy, so the two don't compete for the same weight.
   saveButton: {
     padding: "10px 14px",
-    background: "#ffffff",
-    color: "#1f6f68",
-    border: "1px solid #1f6f68",
+    background: PAPER,
+    color: NAVY,
+    border: `1px solid ${NAVY}`,
     borderRadius: 6,
     fontSize: 12.5,
     fontWeight: 600,
@@ -237,13 +242,13 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "inherit",
     whiteSpace: "nowrap",
   },
-  saveError: { fontSize: 11, color: "#7a3a30", margin: "6px 0 0" },
+  saveError: { fontSize: 11, color: errorText, margin: "6px 0 0" },
   retryButton: {
     marginTop: 12,
-    padding: "9px 14px",
-    background: "#ffffff",
-    color: "#1f6f68",
-    border: "1px solid #1f6f68",
+    padding: "11px 14px",
+    background: NAVY,
+    color: PAPER,
+    border: "none",
     borderRadius: 6,
     fontSize: 12.5,
     fontWeight: 600,
@@ -254,9 +259,9 @@ const styles: Record<string, React.CSSProperties> = {
     display: "block",
     marginTop: 14,
     paddingTop: 12,
-    borderTop: "1px solid #d7ddd6",
+    borderTop: `1px solid ${RULE}`,
     fontSize: 11.5,
-    color: "#7c8580",
+    color: INK_FAINT,
     textDecoration: "none",
   },
   loadingWrap: {
@@ -269,12 +274,12 @@ const styles: Record<string, React.CSSProperties> = {
     marginTop: 16,
     fontSize: 13.5,
     fontWeight: 600,
-    color: "#1f6f68",
+    color: NAVY,
   },
   loadingSubtext: {
     marginTop: 4,
     fontSize: 11.5,
-    color: "#7c8580",
+    color: INK_FAINT,
   },
   dot: {
     display: "inline-block",
