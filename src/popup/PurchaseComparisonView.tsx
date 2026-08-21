@@ -5,8 +5,11 @@ import type { PurchaseOption, QuickTakeRequest } from "../shared/types";
 
 type Status = "loading" | "ready" | "excluded" | "empty" | "error";
 
-const VERIFIED = "#1f6f68";
-const VERIFIED_TINT = "#e2ede9";
+// Navy + gold, matching the header band in QuickTakePanel -- teal
+// read as a third, unrelated accent color next to that pairing.
+const ACCENT = "#0b2d4d";
+const ACCENT_TINT = "#f6ead9";
+const GOLD = "#b5854f";
 const INK = "#1b2220";
 const INK_MUTED = "#4a5450";
 const INK_FAINT = "#7c8580";
@@ -155,8 +158,8 @@ const styles: Record<string, CSSProperties> = {
     fontSize: 10,
     fontWeight: 700,
     letterSpacing: 0.3,
-    color: VERIFIED,
-    background: VERIFIED_TINT,
+    color: ACCENT,
+    background: ACCENT_TINT,
     borderRadius: 999,
     padding: "2px 8px",
     marginBottom: 6,
@@ -172,8 +175,8 @@ const styles: Record<string, CSSProperties> = {
   price: {
     fontFamily: "-apple-system, 'Segoe UI', sans-serif",
     fontSize: 12,
-    fontWeight: 600,
-    color: VERIFIED,
+    fontWeight: 700,
+    color: GOLD,
   },
   keyStat: {
     fontFamily: "-apple-system, 'Segoe UI', sans-serif",
@@ -190,8 +193,8 @@ const styles: Record<string, CSSProperties> = {
   buyLink: {
     fontFamily: "-apple-system, 'Segoe UI', sans-serif",
     fontSize: 12,
-    fontWeight: 600,
-    color: VERIFIED,
+    fontWeight: 700,
+    color: ACCENT,
     textDecoration: "none",
   },
   disclosure: {
