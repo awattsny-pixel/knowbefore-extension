@@ -1,4 +1,9 @@
-import { setStoredToken, clearStoredToken } from "../storage/extensionStorage";
+import {
+  setStoredToken,
+  clearStoredToken,
+  getAutoNudgeEnabled,
+  setAutoNudgeEnabled,
+} from "../storage/extensionStorage";
 
 /** Receives the scoped token from knowbefore.ai/extension/connect via
     externally_connectable (manifest restricts the sender origin to the
@@ -18,6 +23,20 @@ export function registerAuthBridge(): void {
 
     if (message?.type === "KB_DISCONNECT") {
       clearStoredToken().then(() => sendResponse({ ok: true }));
+      return true;
+    }
+
+    // The auto-nudge preference lives in this extension's own storage
+    // (see extensionStorage.getAutoNudgeEnabled) — these two let the
+    // settings page on knowbefore.ai read and change it, the same
+    // trusted-origin pattern as KB_CONNECT above.
+    if (message?.type === "KB_GET_AUTO_NUDGE") {
+      getAutoNudgeEnabled().then((enabled) => sendResponse({ ok: true, enabled }));
+      return true;
+    }
+
+    if (message?.type === "KB_SET_AUTO_NUDGE" && typeof message.enabled === "boolean") {
+      setAutoNudgeEnabled(message.enabled).then(() => sendResponse({ ok: true }));
       return true;
     }
 

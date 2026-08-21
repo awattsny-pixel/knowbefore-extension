@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import { QuickTakePanel } from "./QuickTakePanel";
-import { AutoNudgeSetting } from "./AutoNudgeSetting";
+import { API_BASE } from "../shared/apiClient";
 import type { QuickTakeRequest } from "../shared/types";
 import { getLastDetection } from "../storage/extensionStorage";
 
@@ -42,7 +42,22 @@ async function main() {
   root.render(
     <div style={{ width: 320 }}>
       <QuickTakePanel request={request} />
-      <AutoNudgeSetting />
+      <a
+        href={`${API_BASE}/extension/settings`}
+        target="_blank"
+        rel="noreferrer"
+        style={{
+          display: "block",
+          marginTop: 14,
+          paddingTop: 12,
+          borderTop: "1px solid #d7ddd6",
+          fontSize: 11.5,
+          color: "#7c8580",
+          textDecoration: "none",
+        }}
+      >
+        Settings →
+      </a>
     </div>
   );
 }
