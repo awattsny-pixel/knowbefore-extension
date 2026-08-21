@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { fetchPurchaseOptions } from "../shared/apiClient";
+import { LoadingMark } from "./LoadingMark";
 import type { PurchaseOption, QuickTakeRequest } from "../shared/types";
 
 type Status = "loading" | "ready" | "excluded" | "empty" | "error";
@@ -66,7 +67,10 @@ export function PurchaseComparisonView({ request }: { request: QuickTakeRequest 
       <p style={styles.title}>Compare options</p>
 
       {status === "loading" ? (
-        <p style={styles.muted}>Finding real alternatives…</p>
+        <div style={styles.loadingRow}>
+          <LoadingMark size={22} />
+          <p style={styles.muted}>Finding real alternatives…</p>
+        </div>
       ) : (
         <>
           {comparisonPoints.length > 0 && (
@@ -126,6 +130,7 @@ const styles: Record<string, CSSProperties> = {
     color: INK_MUTED,
     margin: 0,
   },
+  loadingRow: { display: "flex", alignItems: "center", gap: 8 },
   compareList: { margin: "0 0 12px", padding: "0 0 0 16px" },
   compareItem: {
     fontFamily: "-apple-system, 'Segoe UI', sans-serif",
