@@ -18,6 +18,15 @@ function detect(): DetectionSignal | null {
   return detectPdfContext() ?? runDetection();
 }
 
+/** True once this content script's extension context has been torn
+    down — e.g. the extension was reloaded/updated while this tab was
+    already open. chrome.runtime itself goes undefined at that point;
+    every call below is guarded on this so a stale script goes quiet
+    instead of throwing on every SPA navigation. */
+function isContextInvalidated(): boolean {
+  return typeof chrome === "undefined" || !chrome.runtime;
+}
+
 function triggerFor(signal: DetectionSignal): Element | null {
   // Re-find the same trigger element the detector matched, so the
   // inline prompt anchors to the real button rather than a fixed spot.
@@ -30,6 +39,11 @@ function triggerFor(signal: DetectionSignal): Element | null {
 }
 
 async function init() {
+  if (isContextInvalidated()) {
+    observer.disconnect();
+    return;
+  }
+
   const signal = detect();
   if (!signal) return;
 
@@ -41,6 +55,7 @@ async function init() {
   const anchor = triggerFor(signal);
   if (anchor) {
     showInlinePrompt(anchor, () => {
+      if (isContextInvalidated()) return;
       chrome.runtime.sendMessage({ type: "OPEN_QUICK_TAKE", signal });
     });
   }
@@ -48,11 +63,12 @@ async function init() {
 
 // document_idle in the manifest already waits for a settled DOM, but
 // re-run on SPA navigations, which don't fire a fresh document load.
-init();
 let lastUrl = location.href;
-new MutationObserver(() => {
+const observer = new MutationObserver(() => {
   if (location.href !== lastUrl) {
     lastUrl = location.href;
     init();
   }
-}).observe(document.body, { childList: true, subtree: true });
+});
+observer.observe(document.body, { childList: true, subtree: true });
+init();

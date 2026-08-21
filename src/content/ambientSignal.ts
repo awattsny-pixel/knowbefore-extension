@@ -5,10 +5,12 @@
     near the detected trigger. */
 
 export function showAmbientBadgeSignal(): void {
+  if (!chrome.runtime) return; // stale context — see content/index.ts's isContextInvalidated
   chrome.runtime.sendMessage({ type: "SET_BADGE", state: "available" });
 }
 
 export function clearAmbientBadgeSignal(): void {
+  if (!chrome.runtime) return;
   chrome.runtime.sendMessage({ type: "SET_BADGE", state: "idle" });
 }
 
