@@ -55,6 +55,8 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
+  const [retryCount, setRetryCount] = useState(0);
+
   useEffect(() => {
     let cancelled = false;
     setStatus("loading");
@@ -76,7 +78,7 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [retryCount]);
 
   if (status === "not_connected" || status === "session_expired") {
     return (
@@ -117,6 +119,13 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
     return (
       <div style={styles.panel}>
         <p style={styles.muted}>Couldn't complete that analysis. Try again in a moment.</p>
+        <button
+          type="button"
+          onClick={() => setRetryCount((n) => n + 1)}
+          style={styles.retryButton}
+        >
+          Try again
+        </button>
       </div>
     );
   }
@@ -126,7 +135,7 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
       <p style={styles.titlebar}>KNOWBEFORE — QUICK TAKE</p>
       <p style={styles.title}>{data.subject}</p>
       {data.findings.slice(0, 5).map((f, i) => (
-        <div key={i} style={styles.row}>
+        <div key={i} style={{ ...styles.row, ...styles.rowIn, animationDelay: `${i * 60}ms` }}>
           <EvidenceMark state={f.state} size={15} />
           <p style={styles.rowText}>{f.claim}</p>
         </div>
@@ -173,6 +182,7 @@ const styles: Record<string, React.CSSProperties> = {
   title: { fontSize: 15, fontWeight: 700, margin: "0 0 10px" },
   muted: { fontSize: 12.5, color: "#4a5450", margin: 0 },
   row: { display: "flex", gap: 8, alignItems: "flex-start", padding: "8px 0", borderTop: "1px solid #d7ddd6" },
+  rowIn: { opacity: 0, animation: "kb-row-in 320ms ease-out forwards" },
   rowText: { fontSize: 12.5, lineHeight: 1.4, margin: 0 },
   cta: {
     flex: 1,
@@ -203,6 +213,18 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: "nowrap",
   },
   saveError: { fontSize: 11, color: "#7a3a30", margin: "6px 0 0" },
+  retryButton: {
+    marginTop: 12,
+    padding: "9px 14px",
+    background: "#ffffff",
+    color: "#1f6f68",
+    border: "1px solid #1f6f68",
+    borderRadius: 6,
+    fontSize: 12.5,
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "inherit",
+  },
   settingsLink: {
     display: "block",
     marginTop: 14,

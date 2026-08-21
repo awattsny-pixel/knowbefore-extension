@@ -13,9 +13,15 @@ registerAuthBridge();
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message?.type) {
     case "SET_BADGE": {
+      // Scoped to the sending tab -- without tabId, setBadgeText sets
+      // the badge globally, so it stayed lit on every other tab too
+      // once any single tab had a detection. Falls back to the
+      // unscoped (global) form only if the sender has no tab, which
+      // shouldn't happen for a content-script sender in practice.
       const isAvailable = message.state === "available";
-      chrome.action.setBadgeText({ text: isAvailable ? "•" : "" });
-      chrome.action.setBadgeBackgroundColor({ color: "#1f6f68" });
+      const tabId = sender.tab?.id;
+      chrome.action.setBadgeText({ text: isAvailable ? "•" : "", ...(tabId != null ? { tabId } : {}) });
+      chrome.action.setBadgeBackgroundColor({ color: "#1f6f68", ...(tabId != null ? { tabId } : {}) });
       break;
     }
     case "DETECTION_SIGNAL": {

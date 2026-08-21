@@ -1,6 +1,6 @@
 import { runDetection } from "./commitmentDetector";
 import { detectPdfContext } from "./pdfSignal";
-import { showAmbientBadgeSignal, showInlinePrompt } from "./ambientSignal";
+import { showAmbientBadgeSignal, clearAmbientBadgeSignal, showInlinePrompt } from "./ambientSignal";
 import { getAutoNudgeEnabled } from "../storage/extensionStorage";
 import type { DetectionSignal } from "../shared/types";
 
@@ -45,7 +45,14 @@ async function init() {
   }
 
   const signal = detect();
-  if (!signal) return;
+  if (!signal) {
+    // Badge is now per-tab (see serviceWorker.ts's SET_BADGE handler),
+    // but within one tab an SPA navigation can go from a detected page
+    // to a non-detected one without a fresh document load -- clear it
+    // explicitly rather than leaving the last page's badge lit.
+    clearAmbientBadgeSignal();
+    return;
+  }
 
   showAmbientBadgeSignal();
   chrome.runtime.sendMessage({ type: "DETECTION_SIGNAL", signal });
