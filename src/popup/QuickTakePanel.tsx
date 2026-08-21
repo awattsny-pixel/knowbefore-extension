@@ -98,7 +98,39 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
   if (status === "loading" || status === "idle") {
     return (
       <div style={styles.panel}>
-        <p style={styles.muted}>Reading what matters…</p>
+        <div style={styles.loadingWrap}>
+          <div style={styles.markStack}>
+            <svg width="56" height="56" viewBox="0 0 100 100" style={styles.pulseRing} aria-hidden="true">
+              <path d="M50 6 L94 50 L50 94 L6 50 Z" fill="none" stroke="#1f6f68" strokeWidth="4" />
+            </svg>
+            <svg width="56" height="56" viewBox="0 0 100 100" aria-hidden="true">
+              <path
+                d="M50 10 L90 50 L50 90 L10 50 Z"
+                fill="none"
+                stroke="#0b2d4d"
+                strokeWidth="4"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M32 51 L45 64 L70 36"
+                fill="none"
+                stroke="#d4a574"
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray="60"
+                style={styles.scanPath}
+              />
+            </svg>
+          </div>
+          <p style={styles.loadingText}>
+            Reading what matters
+            <span style={{ ...styles.dot, animationDelay: "0ms" }}>.</span>
+            <span style={{ ...styles.dot, animationDelay: "160ms" }}>.</span>
+            <span style={{ ...styles.dot, animationDelay: "320ms" }}>.</span>
+          </p>
+          <p style={styles.loadingSubtext}>Checking terms, price, and fine print</p>
+        </div>
       </div>
     );
   }
@@ -201,5 +233,36 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 11.5,
     color: "#7c8580",
     textDecoration: "none",
+  },
+  loadingWrap: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    padding: "28px 0 20px",
+  },
+  markStack: { position: "relative", width: 56, height: 56 },
+  pulseRing: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    animation: "kb-pulse-ring 1.8s ease-out infinite",
+  },
+  scanPath: {
+    animation: "kb-scan 1.8s ease-in-out infinite",
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 13.5,
+    fontWeight: 600,
+    color: "#1f6f68",
+  },
+  loadingSubtext: {
+    marginTop: 4,
+    fontSize: 11.5,
+    color: "#7c8580",
+  },
+  dot: {
+    display: "inline-block",
+    animation: "kb-dot-cycle 1.4s ease-in-out infinite",
   },
 };
