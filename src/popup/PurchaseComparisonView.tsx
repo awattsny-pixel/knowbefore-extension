@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { fetchPurchaseOptions } from "../shared/apiClient";
 import { LoadingMark } from "./LoadingMark";
-import { NAVY, GOLD, GOLD_TINT, INK, INK_MUTED, INK_FAINT, RULE, PAPER } from "./theme";
+import { NAVY, GOLD, GOLD_TINT, INK, INK_MUTED, INK_FAINT, RULE, PAPER_RAISED } from "./theme";
 import type { PurchaseOption, QuickTakeRequest } from "../shared/types";
 
 type Status = "loading" | "ready" | "excluded" | "empty" | "error";
@@ -137,7 +137,7 @@ const styles: Record<string, CSSProperties> = {
     border: `1px solid ${RULE}`,
     borderRadius: 8,
     padding: "10px 12px",
-    background: PAPER,
+    background: PAPER_RAISED,
     boxShadow: "0 1px 3px rgba(11,45,77,0.06)",
   },
   bestFor: {

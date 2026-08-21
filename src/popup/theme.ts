@@ -15,5 +15,8 @@ export const INK_MUTED = "#4a5450";
 export const INK_FAINT = "#7c8580";
 export const RULE = "#ececec";
 export const PAPER = "#ffffff";
+// A warm-neutral tint (not the old grey-green) for surfaces that sit
+// on top of PAPER and need to pop slightly, e.g. product cards.
+export const PAPER_RAISED = "#faf8f5";
 
 export const errorText = "#7a3a30";
