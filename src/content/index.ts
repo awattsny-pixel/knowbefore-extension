@@ -1,12 +1,18 @@
 import { runDetection } from "./commitmentDetector";
 import { detectPdfContext } from "./pdfSignal";
 import { showAmbientBadgeSignal, showInlinePrompt } from "./ambientSignal";
+import { getAutoNudgeEnabled } from "../storage/extensionStorage";
 import type { DetectionSignal } from "../shared/types";
 
 /** Phase 0 entry point (MVP Build Plan, Section 13). Runs the two
     in-scope detectors, and if either fires, shows the local-only
     ambient signal. Nothing here makes a network request — see
-    Section 3, "the trust boundary is the click." */
+    Section 3, "the trust boundary is the click."
+
+    The toolbar badge always reflects a detection; the in-page inline
+    prompt is opt-in (default off) — see extensionStorage's
+    getAutoNudgeEnabled for why that's a visibility setting, not a
+    consent one. */
 
 function detect(): DetectionSignal | null {
   return detectPdfContext() ?? runDetection();
@@ -23,12 +29,14 @@ function triggerFor(signal: DetectionSignal): Element | null {
   return document.body;
 }
 
-function init() {
+async function init() {
   const signal = detect();
   if (!signal) return;
 
   showAmbientBadgeSignal();
   chrome.runtime.sendMessage({ type: "DETECTION_SIGNAL", signal });
+
+  if (!(await getAutoNudgeEnabled())) return;
 
   const anchor = triggerFor(signal);
   if (anchor) {

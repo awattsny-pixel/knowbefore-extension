@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import { QuickTakePanel } from "./QuickTakePanel";
+import { AutoNudgeSetting } from "./AutoNudgeSetting";
 import type { QuickTakeRequest } from "../shared/types";
 import { getLastDetection } from "../storage/extensionStorage";
 
@@ -38,7 +39,12 @@ async function buildRequest(): Promise<QuickTakeRequest> {
 async function main() {
   const root = createRoot(document.getElementById("root")!);
   const request = await buildRequest();
-  root.render(<QuickTakePanel request={request} />);
+  root.render(
+    <div style={{ width: 320 }}>
+      <QuickTakePanel request={request} />
+      <AutoNudgeSetting />
+    </div>
+  );
 }
 
 main();

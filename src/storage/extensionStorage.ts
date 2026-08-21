@@ -9,6 +9,7 @@ import type { DetectionSignal } from "../shared/types";
 
 const TOKEN_KEY = "kb_extension_token";
 const DETECTION_KEY_PREFIX = "kb_detection_";
+const AUTO_NUDGE_KEY = "kb_auto_nudge_enabled";
 
 export async function getStoredToken(): Promise<string | null> {
   const result = await chrome.storage.local.get(TOKEN_KEY);
@@ -21,6 +22,21 @@ export async function setStoredToken(token: string): Promise<void> {
 
 export async function clearStoredToken(): Promise<void> {
   await chrome.storage.local.remove(TOKEN_KEY);
+}
+
+/** Opt-in setting (default off): whether the content script's inline
+    "worth understanding first?" prompt appears on detection at all.
+    The ambient toolbar badge always shows regardless — this setting
+    governs the in-page nudge only, per the "sends nothing until you
+    click" trust boundary: enabling it changes when the prompt to
+    click appears, never whether a click is still required. */
+export async function getAutoNudgeEnabled(): Promise<boolean> {
+  const result = await chrome.storage.local.get(AUTO_NUDGE_KEY);
+  return result[AUTO_NUDGE_KEY] ?? false;
+}
+
+export async function setAutoNudgeEnabled(enabled: boolean): Promise<void> {
+  await chrome.storage.local.set({ [AUTO_NUDGE_KEY]: enabled });
 }
 
 /** The content script's classification is the only source of truth for
