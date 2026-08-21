@@ -150,6 +150,9 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
       {saveStatus === "error" && (
         <p style={styles.saveError}>Couldn&apos;t save — try again in a moment.</p>
       )}
+      <a href={`${API_BASE}/extension/settings`} target="_blank" rel="noreferrer" style={styles.settingsLink}>
+        Settings →
+      </a>
     </div>
   );
 }
@@ -190,4 +193,13 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: "nowrap",
   },
   saveError: { fontSize: 11, color: "#7a3a30", margin: "6px 0 0" },
+  settingsLink: {
+    display: "block",
+    marginTop: 14,
+    paddingTop: 12,
+    borderTop: "1px solid #d7ddd6",
+    fontSize: 11.5,
+    color: "#7c8580",
+    textDecoration: "none",
+  },
 };
