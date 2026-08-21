@@ -83,17 +83,19 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
   if (status === "not_connected" || status === "session_expired") {
     return (
       <div style={styles.panel}>
-        <p style={styles.title}>
-          {status === "not_connected" ? "Connect your KnowBefore account" : "Reconnect KnowBefore"}
-        </p>
-        <p style={styles.muted}>
-          {status === "not_connected"
-            ? "You'll only need to do this once."
-            : "Your session expired — this happens after a while for your security."}
-        </p>
-        <a href={`${API_BASE}/extension/connect`} target="_blank" rel="noreferrer" style={styles.cta}>
-          {status === "not_connected" ? "Connect" : "Reconnect"} →
-        </a>
+        <div style={styles.contentPad}>
+          <p style={styles.title}>
+            {status === "not_connected" ? "Connect your KnowBefore account" : "Reconnect KnowBefore"}
+          </p>
+          <p style={styles.muted}>
+            {status === "not_connected"
+              ? "You'll only need to do this once."
+              : "Your session expired — this happens after a while for your security."}
+          </p>
+          <a href={`${API_BASE}/extension/connect`} target="_blank" rel="noreferrer" style={styles.cta}>
+            {status === "not_connected" ? "Connect" : "Reconnect"} →
+          </a>
+        </div>
       </div>
     );
   }
@@ -118,70 +120,93 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
   if (status === "error" || !data) {
     return (
       <div style={styles.panel}>
-        <p style={styles.muted}>Couldn't complete that analysis. Try again in a moment.</p>
-        <button
-          type="button"
-          onClick={() => setRetryCount((n) => n + 1)}
-          style={styles.retryButton}
-        >
-          Try again
-        </button>
+        <div style={styles.contentPad}>
+          <p style={styles.muted}>Couldn't complete that analysis. Try again in a moment.</p>
+          <button
+            type="button"
+            onClick={() => setRetryCount((n) => n + 1)}
+            style={styles.retryButton}
+          >
+            Try again
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div style={styles.panel}>
-      <p style={styles.titlebar}>KNOWBEFORE — QUICK TAKE</p>
-      <p style={styles.title}>{data.subject}</p>
-      {data.findings.slice(0, 5).map((f, i) => (
-        <div key={i} style={{ ...styles.row, ...styles.rowIn, animationDelay: `${i * 60}ms` }}>
-          <EvidenceMark state={f.state} size={15} />
-          <p style={styles.rowText}>{f.claim}</p>
-        </div>
-      ))}
+      <div style={styles.header}>
+        <p style={styles.titlebar}>KNOWBEFORE — QUICK TAKE</p>
+        <p style={styles.title}>{data.subject}</p>
+      </div>
+      <div style={styles.contentPad}>
+        {data.findings.slice(0, 5).map((f, i) => (
+          <div key={i} style={{ ...styles.row, ...styles.rowIn, animationDelay: `${i * 60}ms` }}>
+            <EvidenceMark state={f.state} size={15} />
+            <p style={styles.rowText}>{f.claim}</p>
+          </div>
+        ))}
 
-      {/* Its own zone, always after the findings — never interleaved
-          with them. See PurchaseComparisonView's own comment for why
-          that ordering is Appendix B's firewall, not just a layout
-          choice. Renders nothing at all on excluded/empty/error. */}
-      <PurchaseComparisonView request={request} />
+        {/* Its own zone, always after the findings — never interleaved
+            with them. See PurchaseComparisonView's own comment for why
+            that ordering is Appendix B's firewall, not just a layout
+            choice. Renders nothing at all on excluded/empty/error. */}
+        <PurchaseComparisonView request={request} />
 
-      <div style={styles.actions}>
-        {data.decisionId && (
+        <div style={styles.actions}>
+          {data.decisionId && (
+            <button
+              type="button"
+              onClick={() => handleSave(data.decisionId!)}
+              disabled={saveStatus === "saving" || saveStatus === "saved"}
+              style={styles.saveButton}
+            >
+              {saveStatus === "saved" ? "Saved ✓" : saveStatus === "saving" ? "Saving…" : "Save"}
+            </button>
+          )}
           <button
             type="button"
-            onClick={() => handleSave(data.decisionId!)}
-            disabled={saveStatus === "saving" || saveStatus === "saved"}
-            style={styles.saveButton}
+            onClick={() => handleOpenWorkspace(fullWorkspaceUrl(data), data.decisionId)}
+            style={styles.cta}
           >
-            {saveStatus === "saved" ? "Saved ✓" : saveStatus === "saving" ? "Saving…" : "Save"}
+            Open full Commitment Workspace →
           </button>
+        </div>
+        {saveStatus === "error" && (
+          <p style={styles.saveError}>Couldn&apos;t save — try again in a moment.</p>
         )}
-        <button
-          type="button"
-          onClick={() => handleOpenWorkspace(fullWorkspaceUrl(data), data.decisionId)}
-          style={styles.cta}
-        >
-          Open full Commitment Workspace →
-        </button>
+        <a href={`${API_BASE}/extension/settings`} target="_blank" rel="noreferrer" style={styles.settingsLink}>
+          Settings →
+        </a>
       </div>
-      {saveStatus === "error" && (
-        <p style={styles.saveError}>Couldn&apos;t save — try again in a moment.</p>
-      )}
-      <a href={`${API_BASE}/extension/settings`} target="_blank" rel="noreferrer" style={styles.settingsLink}>
-        Settings →
-      </a>
     </div>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  panel: { width: 320, fontFamily: "-apple-system, 'Segoe UI', sans-serif", color: "#1b2220" },
-  titlebar: { fontSize: 11, fontWeight: 700, letterSpacing: 1, color: "#7c8580", margin: "0 0 8px" },
-  title: { fontSize: 15, fontWeight: 700, margin: "0 0 10px" },
+  panel: {
+    width: 320,
+    fontFamily: "-apple-system, 'Segoe UI', sans-serif",
+    color: "#1b2220",
+    background: "#ffffff",
+    overflow: "hidden",
+  },
+  header: {
+    background: "#0b2d4d",
+    padding: "16px 16px 14px",
+  },
+  contentPad: { padding: "14px 16px 16px" },
+  titlebar: { fontSize: 11, fontWeight: 700, letterSpacing: 1, color: "#d4a574", margin: "0 0 6px" },
+  title: { fontSize: 16, fontWeight: 700, color: "#ffffff", margin: 0 },
   muted: { fontSize: 12.5, color: "#4a5450", margin: 0 },
-  row: { display: "flex", gap: 8, alignItems: "flex-start", padding: "8px 0", borderTop: "1px solid #d7ddd6" },
+  row: {
+    display: "flex",
+    gap: 8,
+    alignItems: "flex-start",
+    padding: "10px 0",
+    borderTop: "1px solid #ececec",
+  },
   rowIn: { opacity: 0, animation: "kb-row-in 320ms ease-out forwards" },
   rowText: { fontSize: 12.5, lineHeight: 1.4, margin: 0 },
   cta: {
@@ -238,7 +263,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    padding: "28px 0 20px",
+    padding: "28px 16px 20px",
   },
   loadingText: {
     marginTop: 16,

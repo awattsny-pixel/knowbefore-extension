@@ -11,7 +11,10 @@ const INK = "#1b2220";
 const INK_MUTED = "#4a5450";
 const INK_FAINT = "#7c8580";
 const RULE = "#d7ddd6";
-const PAPER_RAISED = "#ffffff";
+// A tint, not pure white -- the popup's own background is white now
+// (see popup.html), so a white card would have no visible separation
+// from the panel it sits on.
+const PAPER_RAISED = "#f7f8f6";
 
 /** The "where to buy" zone — always rendered below and visually
     distinct from the evidence findings in QuickTakePanel, never
