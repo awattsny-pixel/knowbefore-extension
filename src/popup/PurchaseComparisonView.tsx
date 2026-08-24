@@ -62,7 +62,12 @@ export function PurchaseComparisonView({ request }: { request: QuickTakeRequest 
       {status === "loading" ? (
         <div style={styles.loadingRow}>
           <LoadingMark size={22} />
-          <p style={styles.muted}>Finding real alternatives…</p>
+          <p style={styles.muted}>
+            Finding real alternatives
+            <span style={{ ...styles.dot, animationDelay: "0ms" }}>.</span>
+            <span style={{ ...styles.dot, animationDelay: "160ms" }}>.</span>
+            <span style={{ ...styles.dot, animationDelay: "320ms" }}>.</span>
+          </p>
         </div>
       ) : (
         <>
@@ -124,6 +129,10 @@ const styles: Record<string, CSSProperties> = {
     margin: 0,
   },
   loadingRow: { display: "flex", alignItems: "center", gap: 8 },
+  // Same kb-dot-cycle animation as QuickTakePanel's "Reading what
+  // matters…" state -- the loading mark alone read as static at this
+  // size, so the dots carry the "still working" signal instead.
+  dot: { display: "inline-block", animation: "kb-dot-cycle 1.4s ease-in-out infinite" },
   compareList: { margin: "0 0 12px", padding: "0 0 0 16px" },
   compareItem: {
     fontFamily: "-apple-system, 'Segoe UI', sans-serif",
