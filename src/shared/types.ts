@@ -78,3 +78,28 @@ export interface DetectionSignal {
   detectedAction: string;
   confidence: "low" | "medium" | "high";
 }
+
+/** A single dark-pattern signal found in the checkout DOM itself --
+    entirely local, entirely deterministic (regex/DOM queries, no ML,
+    no network call). Reuses EvidenceState rather than a parallel
+    confidence taxonomy: "confirmed" for things read directly off the
+    page (a checkbox's actual .checked value, stated renewal text),
+    "assumed" for a pattern that's suggestive but not stated outright
+    (a countdown timer, a trial with no visible charge date). */
+export type CheckoutFlagKind =
+  | "prechecked_addon"
+  | "auto_renewal"
+  | "trial_to_paid"
+  | "urgency_pattern";
+
+export interface CheckoutFlag {
+  kind: CheckoutFlagKind;
+  state: EvidenceState;
+  /** Short, plain-English line for the anchored panel, e.g.
+      "This renews at $49/mo starting Nov 5." */
+  label: string;
+  /** Optional structured details surfaced in the label/tooltip --
+      not sent anywhere, just what the detector actually found. */
+  amount?: string;
+  date?: string;
+}

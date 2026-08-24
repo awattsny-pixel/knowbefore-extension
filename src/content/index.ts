@@ -1,6 +1,8 @@
 import { runDetection } from "./commitmentDetector";
 import { detectPdfContext } from "./pdfSignal";
 import { showAmbientBadgeSignal, clearAmbientBadgeSignal, showInlinePrompt } from "./ambientSignal";
+import { extractCheckoutFlags } from "./checkoutSignals";
+import { showCheckoutFlagPanel } from "./checkoutFlagPanel";
 import { getAutoNudgeEnabled } from "../storage/extensionStorage";
 import type { DetectionSignal } from "../shared/types";
 
@@ -60,11 +62,24 @@ async function init() {
   if (!(await getAutoNudgeEnabled())) return;
 
   const anchor = triggerFor(signal);
-  if (anchor) {
-    showInlinePrompt(anchor, () => {
-      if (isContextInvalidated()) return;
-      chrome.runtime.sendMessage({ type: "OPEN_QUICK_TAKE", signal });
-    });
+  if (!anchor) return;
+
+  const openQuickTake = () => {
+    if (isContextInvalidated()) return;
+    chrome.runtime.sendMessage({ type: "OPEN_QUICK_TAKE", signal });
+  };
+
+  // Checkout flags are more specific and more valuable than the
+  // generic "worth understanding first?" prompt, so they take the
+  // same single slot instead of stacking two panels -- both are
+  // gated by the same auto-nudge setting either way (see
+  // extensionStorage.getAutoNudgeEnabled: this setting governs
+  // whether ANY in-page visual appears, not just the generic one).
+  const flags = extractCheckoutFlags();
+  if (flags.length > 0) {
+    showCheckoutFlagPanel(anchor, flags, openQuickTake);
+  } else {
+    showInlinePrompt(anchor, openQuickTake);
   }
 }
 
