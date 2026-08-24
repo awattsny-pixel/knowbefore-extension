@@ -1,5 +1,5 @@
 import { registerAuthBridge } from "./authBridge";
-import { setLastDetection } from "../storage/extensionStorage";
+import { setLastDetection, setLastCheckoutFlags } from "../storage/extensionStorage";
 
 /** Phase 0/1 message router (MVP Build Plan, Section 13). Owns the
     toolbar badge and forwards detection telemetry — still entirely
@@ -37,6 +37,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // wire to a real (privacy-respecting) telemetry sink before
       // Phase 1 testing begins.
       console.debug("[KnowBefore] detection signal", message.signal);
+      break;
+    }
+    case "SET_CHECKOUT_FLAGS": {
+      // Mirrors DETECTION_SIGNAL above -- popup reads this back by tab
+      // id if the user clicks through, to decide whether to fetch the
+      // subscriptions summary. No network call happens here either.
+      if (sender.tab?.id != null) {
+        setLastCheckoutFlags(sender.tab.id, message.flags);
+      }
       break;
     }
     case "OPEN_QUICK_TAKE": {

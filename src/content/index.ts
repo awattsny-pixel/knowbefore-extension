@@ -77,6 +77,10 @@ async function init() {
   // whether ANY in-page visual appears, not just the generic one).
   const flags = extractCheckoutFlags();
   if (flags.length > 0) {
+    // Stashed for the popup to read if the user clicks through to
+    // Quick Take -- see QuickTakePanel's subscriptions-summary fetch.
+    // Still local storage via the service worker, not a network call.
+    chrome.runtime.sendMessage({ type: "SET_CHECKOUT_FLAGS", flags });
     showCheckoutFlagPanel(anchor, flags, openQuickTake);
   } else {
     showInlinePrompt(anchor, openQuickTake);

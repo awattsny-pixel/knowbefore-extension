@@ -1,5 +1,11 @@
 import { getStoredToken } from "../storage/extensionStorage";
-import type { CategoryExcluded, PurchaseOptionsResponse, QuickTakeRequest, QuickTakeResponse } from "./types";
+import type {
+  CategoryExcluded,
+  PurchaseOptionsResponse,
+  QuickTakeRequest,
+  QuickTakeResponse,
+  SubscriptionsSummaryResponse,
+} from "./types";
 
 export const API_BASE = "https://www.knowbefore.ai";
 
@@ -57,6 +63,25 @@ export async function fetchPurchaseOptions(
 
   if (res.status === 401) throw new SessionExpiredError();
   if (!res.ok) throw new Error(`purchase-options failed: ${res.status}`);
+
+  return res.json();
+}
+
+/** Only called from QuickTakePanel, after the user has already opened
+    Quick Take and only when the page had a billable checkout flag —
+    never from the content script or the anchored panel. See the
+    route's own comment for why that keeps the trust boundary intact. */
+export async function fetchSubscriptionsSummary(): Promise<SubscriptionsSummaryResponse> {
+  const token = await getStoredToken();
+  if (!token) throw new NotConnectedError();
+
+  const res = await fetch(`${API_BASE}/api/extension/subscriptions-summary`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (res.status === 401) throw new SessionExpiredError();
+  if (!res.ok) throw new Error(`subscriptions-summary failed: ${res.status}`);
 
   return res.json();
 }

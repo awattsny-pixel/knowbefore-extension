@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { QuickTakePanel } from "./QuickTakePanel";
 import type { QuickTakeRequest } from "../shared/types";
-import { getLastDetection } from "../storage/extensionStorage";
+import { getLastDetection, getLastCheckoutFlags } from "../storage/extensionStorage";
 
 /** Assembles the request from the active tab's page — see Section 4,
     Context Collection: only what's necessary, gathered fresh right
@@ -14,7 +14,7 @@ import { getLastDetection } from "../storage/extensionStorage";
 async function buildRequest(): Promise<QuickTakeRequest> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-  const [injection, detection] = await Promise.all([
+  const [injection, detection, checkoutFlags] = await Promise.all([
     chrome.scripting.executeScript({
       target: { tabId: tab.id! },
       func: () => ({
@@ -23,6 +23,7 @@ async function buildRequest(): Promise<QuickTakeRequest> {
       }),
     }),
     tab.id != null ? getLastDetection(tab.id) : Promise.resolve(null),
+    tab.id != null ? getLastCheckoutFlags(tab.id) : Promise.resolve([]),
   ]);
   const result = injection[0]?.result ?? { title: tab.title ?? "", text: "" };
 
@@ -32,6 +33,7 @@ async function buildRequest(): Promise<QuickTakeRequest> {
     commitmentType: detection?.commitmentType ?? "unknown",
     relevantText: result.text,
     detectedAction: detection?.detectedAction ?? null,
+    checkoutFlags: checkoutFlags.length > 0 ? checkoutFlags : undefined,
   };
 }
 

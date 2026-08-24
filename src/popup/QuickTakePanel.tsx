@@ -2,9 +2,23 @@ import { useEffect, useState } from "react";
 import { EvidenceMark } from "./EvidenceMark";
 import { LoadingMark } from "./LoadingMark";
 import { PurchaseComparisonView } from "./PurchaseComparisonView";
-import { API_BASE, fetchQuickTake, saveQuickTake, NotConnectedError, SessionExpiredError } from "../shared/apiClient";
+import {
+  API_BASE,
+  fetchQuickTake,
+  fetchSubscriptionsSummary,
+  saveQuickTake,
+  NotConnectedError,
+  SessionExpiredError,
+} from "../shared/apiClient";
 import { NAVY, GOLD_LIGHT, INK, INK_MUTED, INK_FAINT, RULE, PAPER, errorText } from "./theme";
-import type { QuickTakeRequest, QuickTakeResponse } from "../shared/types";
+import type { QuickTakeRequest, QuickTakeResponse, SubscriptionsSummaryResponse } from "../shared/types";
+
+function formatSubscriptionsSummary(summary: SubscriptionsSummaryResponse): string | null {
+  if (summary.count === 0) return null;
+  const dollars = (summary.monthlyTotalCents / 100).toFixed(summary.monthlyTotalCents % 100 === 0 ? 0 : 2);
+  const plural = summary.count === 1 ? "subscription" : "subscriptions";
+  return `You already have ${summary.count} active ${plural} totaling $${dollars}/mo.`;
+}
 
 type Status = "idle" | "loading" | "ready" | "not_connected" | "session_expired" | "error";
 type SaveStatus = "idle" | "saving" | "saved" | "error";
@@ -33,6 +47,11 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
   const [status, setStatus] = useState<Status>("idle");
   const [data, setData] = useState<QuickTakeResponse | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [subscriptionsLine, setSubscriptionsLine] = useState<string | null>(null);
+
+  const hasBillableCheckoutFlag = (request.checkoutFlags ?? []).some(
+    (f) => f.kind === "trial_to_paid" || f.kind === "auto_renewal"
+  );
 
   async function handleSave(decisionId: string) {
     setSaveStatus("saving");
@@ -67,6 +86,20 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
         if (cancelled) return;
         setData(res);
         setStatus("ready");
+        // Fired only after Quick Take has already resolved, and only
+        // when the page itself had a billable checkout flag -- see
+        // fetchSubscriptionsSummary's own comment on the trust boundary.
+        if (hasBillableCheckoutFlag) {
+          fetchSubscriptionsSummary()
+            .then((summary) => {
+              if (!cancelled) setSubscriptionsLine(formatSubscriptionsSummary(summary));
+            })
+            .catch(() => {
+              // Silent failure -- this is a bonus line, not core to Quick
+              // Take, and every real error case already has a message
+              // surfaced elsewhere (not_connected/session_expired above).
+            });
+        }
       })
       .catch((err) => {
         if (cancelled) return;
@@ -148,6 +181,8 @@ export function QuickTakePanel({ request }: { request: QuickTakeRequest }) {
             <p style={styles.rowText}>{f.claim}</p>
           </div>
         ))}
+
+        {subscriptionsLine && <p style={styles.subscriptionsLine}>{subscriptionsLine}</p>}
 
         {/* Its own zone, always after the findings — never interleaved
             with them. See PurchaseComparisonView's own comment for why
@@ -243,6 +278,14 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: "nowrap",
   },
   saveError: { fontSize: 11, color: errorText, margin: "6px 0 0" },
+  subscriptionsLine: {
+    fontSize: 12,
+    color: INK_MUTED,
+    margin: "12px 0 0",
+    padding: "10px 12px",
+    background: "#f6ead9",
+    borderRadius: 6,
+  },
   retryButton: {
     marginTop: 12,
     padding: "11px 14px",

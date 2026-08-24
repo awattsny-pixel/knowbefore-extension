@@ -29,6 +29,16 @@ export interface QuickTakeRequest {
       everything available" rule in Section 4. */
   relevantText: string;
   detectedAction: string | null;
+  /** Local checkout-flag detections for this page, if any -- see
+      checkoutSignals.ts. Only included when the user has already
+      opened Quick Take, same as everything else in this request. */
+  checkoutFlags?: CheckoutFlag[];
+}
+
+export interface SubscriptionsSummaryResponse {
+  count: number;
+  monthlyTotalCents: number;
+  currency: string;
 }
 
 export interface QuickTakeResponse {

@@ -5,11 +5,12 @@
     this storage being weaker than an HttpOnly cookie is a bounded
     risk rather than a full-account one. */
 
-import type { DetectionSignal } from "../shared/types";
+import type { CheckoutFlag, DetectionSignal } from "../shared/types";
 
 const TOKEN_KEY = "kb_extension_token";
 const DETECTION_KEY_PREFIX = "kb_detection_";
 const AUTO_NUDGE_KEY = "kb_auto_nudge_enabled";
+const CHECKOUT_FLAGS_KEY_PREFIX = "kb_checkout_flags_";
 
 export async function getStoredToken(): Promise<string | null> {
   const result = await chrome.storage.local.get(TOKEN_KEY);
@@ -50,4 +51,17 @@ export async function getLastDetection(tabId: number): Promise<DetectionSignal |
   const key = DETECTION_KEY_PREFIX + tabId;
   const result = await chrome.storage.local.get(key);
   return result[key] ?? null;
+}
+
+/** Mirrors setLastDetection/getLastDetection but for checkoutSignals.ts's
+    output -- the popup has no DOM access of its own, so it reads back
+    whatever the content script already found locally on this tab. */
+export async function setLastCheckoutFlags(tabId: number, flags: CheckoutFlag[]): Promise<void> {
+  await chrome.storage.local.set({ [CHECKOUT_FLAGS_KEY_PREFIX + tabId]: flags });
+}
+
+export async function getLastCheckoutFlags(tabId: number): Promise<CheckoutFlag[]> {
+  const key = CHECKOUT_FLAGS_KEY_PREFIX + tabId;
+  const result = await chrome.storage.local.get(key);
+  return result[key] ?? [];
 }

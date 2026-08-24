@@ -1,6 +1,6 @@
 {
   "name": "knowbefore-extension",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "KnowBefore browser thin client — local detection, one-click handoff to the platform.",
   "scripts": {
