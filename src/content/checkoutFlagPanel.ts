@@ -6,8 +6,16 @@ import { NAVY, GOLD_LIGHT, INK, INK_MUTED, RULE, PAPER } from "../popup/theme";
     Shown instead of that generic prompt when checkoutSignals.ts finds
     something concrete: real content (renewal date, pre-checked
     add-on), not just "click to find out." Same non-blocking rule
-    applies -- anchored near the trigger, never a modal, dismissible,
-    nothing sent anywhere until "See details" is clicked. */
+    applies -- never a modal, dismissible, nothing sent anywhere until
+    "See details" is clicked.
+
+    Embedded as a real DOM sibling of its anchor (see ambientSignal.ts's
+    showInlinePrompt for the same reasoning) rather than an absolutely-
+    positioned overlay that vanished on scroll -- this one specifically
+    is designed to anchor next to a detected price element when
+    checkoutSignals.findPriceAnchor() finds one, the same way a Honey
+    badge sits next to Amazon's price, falling back to the trigger
+    button when no price element was found. */
 
 const PANEL_ID = "knowbefore-checkout-flag-panel";
 const PANEL_STYLE_ID = "knowbefore-checkout-flag-panel-style";
@@ -53,8 +61,10 @@ export function showCheckoutFlagPanel(anchor: Element, flags: CheckoutFlag[], on
 
   const panel = document.createElement("div");
   panel.id = PANEL_ID;
+  const embedded = anchor !== document.body;
   panel.style.cssText = [
-    "position: absolute",
+    embedded ? "position: relative" : "position: fixed",
+    ...(embedded ? ["margin-top: 6px"] : ["bottom: 20px", "right: 20px"]),
     "z-index: 2147483647",
     `font-family: -apple-system, 'Segoe UI', sans-serif`,
     `background: ${PAPER}`,
@@ -112,14 +122,13 @@ export function showCheckoutFlagPanel(anchor: Element, flags: CheckoutFlag[], on
   dismissLink.addEventListener("click", () => dismiss());
   panel.appendChild(dismissLink);
 
-  const rect = anchor.getBoundingClientRect();
-  panel.style.top = `${window.scrollY + rect.bottom + 6}px`;
-  panel.style.left = `${window.scrollX + rect.left}px`;
-
   function dismiss() {
     panel.remove();
   }
-  window.addEventListener("scroll", dismiss, { once: true, passive: true });
 
-  document.body.appendChild(panel);
+  if (embedded) {
+    anchor.insertAdjacentElement("afterend", panel);
+  } else {
+    document.body.appendChild(panel);
+  }
 }

@@ -1,7 +1,7 @@
 import { runDetection } from "./commitmentDetector";
 import { detectPdfContext } from "./pdfSignal";
 import { showAmbientBadgeSignal, clearAmbientBadgeSignal, showInlinePrompt } from "./ambientSignal";
-import { extractCheckoutFlags } from "./checkoutSignals";
+import { extractCheckoutFlags, findPriceAnchor } from "./checkoutSignals";
 import { showCheckoutFlagPanel } from "./checkoutFlagPanel";
 import { getAutoNudgeEnabled } from "../storage/extensionStorage";
 import type { DetectionSignal } from "../shared/types";
@@ -81,7 +81,9 @@ async function init() {
     // Quick Take -- see QuickTakePanel's subscriptions-summary fetch.
     // Still local storage via the service worker, not a network call.
     chrome.runtime.sendMessage({ type: "SET_CHECKOUT_FLAGS", flags });
-    showCheckoutFlagPanel(anchor, flags, openQuickTake);
+    // Prefer embedding next to an actual price on the page over the
+    // trigger button -- see checkoutSignals.findPriceAnchor's comment.
+    showCheckoutFlagPanel(findPriceAnchor() ?? anchor, flags, openQuickTake);
   } else {
     showInlinePrompt(anchor, openQuickTake);
   }

@@ -132,6 +132,24 @@ function detectUrgencyPatterns(): CheckoutFlag[] {
   }];
 }
 
+/** Best-effort DOM anchor for a price on the page -- used to embed
+    the checkout-flag panel next to an actual price the way a
+    Honey-style badge sits next to Amazon's price, rather than next to
+    whatever button happened to trigger detection. Picks the first
+    short, leaf-level element whose own text is just a price (not a
+    paragraph that happens to contain one), which in practice matches
+    the dedicated price element on most checkout/product pages. Null
+    if nothing matches -- callers fall back to the trigger anchor. */
+export function findPriceAnchor(): Element | null {
+  const candidates = document.querySelectorAll("span, div, td, strong, b, p");
+  for (const el of candidates) {
+    if (el.children.length > 0) continue; // leaf nodes only -- skip containers
+    const text = (el.textContent || "").trim();
+    if (text.length > 0 && text.length <= 12 && PRICE_PATTERN.test(text)) return el;
+  }
+  return null;
+}
+
 /** Runs all four detectors and returns whatever they found, most
     important first (trial-to-paid and auto-renewal are the two the
     spec calls highest-value; pre-checked and urgency follow). Caps at

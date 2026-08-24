@@ -37,11 +37,22 @@ function ensurePromptStyle(): void {
   document.head.appendChild(style);
 }
 
-/** One dismissible card near the trigger element — never a modal.
+/** One dismissible card next to the trigger element — never a modal.
     "Worth understanding first?" per the friction-reduction discussion
     behind this build. Same diamond/checkmark mark and navy/gold/teal
     palette as the rest of the product, rather than a plain color pill,
-    so it reads as KnowBefore rather than a generic browser toast. */
+    so it reads as KnowBefore rather than a generic browser toast.
+
+    Embedded into the page's own layout as a real DOM sibling of the
+    trigger button (like a Honey-style inline badge), not an
+    absolutely-positioned overlay snapshotted at one scroll position --
+    the earlier version disappeared the instant the page scrolled,
+    which is backwards for a "read this before you click" prompt: the
+    people who scroll to read more are exactly the people this is
+    for. Living in the DOM means it scrolls with the page naturally
+    and needs no scroll-dismiss listener at all. Falls back to a
+    fixed-position overlay only when there's no real element to embed
+    next to (anchor is document.body — see triggerFor's fallback). */
 export function showInlinePrompt(anchor: Element, onClick: () => void): void {
   if (document.getElementById(INLINE_PROMPT_ID)) return;
   ensurePromptStyle();
@@ -50,8 +61,11 @@ export function showInlinePrompt(anchor: Element, onClick: () => void): void {
   prompt.id = INLINE_PROMPT_ID;
   prompt.setAttribute("role", "button");
   prompt.tabIndex = 0;
+
+  const embedded = anchor !== document.body;
   prompt.style.cssText = [
-    "position: absolute",
+    embedded ? "position: relative" : "position: fixed",
+    ...(embedded ? ["margin-top: 6px"] : ["bottom: 20px", "right: 20px"]),
     "z-index: 2147483647",
     "display: flex",
     "align-items: center",
@@ -64,6 +78,7 @@ export function showInlinePrompt(anchor: Element, onClick: () => void): void {
     "cursor: pointer",
     "box-shadow: 0 6px 20px rgba(11,45,77,0.14)",
     "animation: kb-inline-prompt-in 200ms ease-out",
+    "width: fit-content",
   ].join(";");
 
   prompt.innerHTML = `
@@ -77,16 +92,14 @@ export function showInlinePrompt(anchor: Element, onClick: () => void): void {
     </span>
   `;
 
-  const rect = anchor.getBoundingClientRect();
-  prompt.style.top = `${window.scrollY + rect.bottom + 6}px`;
-  prompt.style.left = `${window.scrollX + rect.left}px`;
-
-  const dismiss = () => prompt.remove();
   prompt.addEventListener("click", () => {
     onClick();
-    dismiss();
+    prompt.remove();
   });
-  window.addEventListener("scroll", dismiss, { once: true, passive: true });
 
-  document.body.appendChild(prompt);
+  if (embedded) {
+    anchor.insertAdjacentElement("afterend", prompt);
+  } else {
+    document.body.appendChild(prompt);
+  }
 }
